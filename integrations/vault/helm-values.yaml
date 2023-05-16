@@ -1,0 +1,64 @@
+global:
+  # All components are enabled
+  enabled: true
+  # Disabled TLS
+  tlsDisable: true
+
+server:
+  enabled: "-"
+
+  dev:
+    # Dev mode
+    enabled: true
+    # Root token
+    devRootToken: "root"
+
+  dataStorage:
+    # Storage is required for standalone/production mode
+    enabled: false
+    # Size of the PVC created
+    size: 10Gi
+    # Location where the PVC will be mounted.
+    mountPath: "/vault/data"
+    # Name of the storage class to use.  If null it will use the
+    # configured default Storage Class.
+    storageClass: null
+    # Access Mode of the storage device being used for the PVC
+    accessMode: ReadWriteOnce
+    # Annotations to apply to the PVC
+    annotations: {}
+
+  standalone:
+    # Standalone mode - Disabled
+    enabled: false
+
+    # Config
+    config: |
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        #tls_cert_file = "/vault/userconfig/tls-server/tls.crt"
+        #tls_key_file = "/vault/userconfig/tls-server/tls.key"
+      }
+
+      storage "file" {
+        path = "/vault/data"
+      }
+
+  # Disabled by default
+  # volumes:
+  #   - name: tls-server
+  #     secret:
+  #       secretName: tls-server
+  #       defaultMode: 0400
+
+  # volumeMounts:
+  #   - name: tls-server
+  #     mountPath: /vault/userconfig/tls-server
+  #     readOnly: true
+
+  ha:
+    # HA mode - Disabled
+    enabled: false
