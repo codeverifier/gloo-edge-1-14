@@ -154,7 +154,7 @@ echo -n "Deploying Gloo Edge $GLOO_EDGE_VERSION"
 echo ""
 
 if [[ "$should_deploy_integrations" == true ]]; then
-    $DIR/integrations/provision-integrations.sh -n $PRJECT -r $CLUSTER_REGION -p $CLOUD_PROVIDER -c $CURRENT_CONTEXT -s "cert_manager, vault"
+    $DIR/integrations/provision-integrations.sh -n $PROJECT -r $CLUSTER_REGION -p $CLOUD_PROVIDER -c $CURRENT_CONTEXT -s "cert_manager, vault"
 fi
 
 install_gloo_edge $CURRENT_CONTEXT

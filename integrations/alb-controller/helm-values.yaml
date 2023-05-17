@@ -2,7 +2,7 @@ clusterName: "${CLUSTER_NAME}"
 
 serviceAccount:
   create: false 
-  name: alb-ingress-controller
+  name: aws-load-balancer-controller
 
 region: $EKS_CLUSTER_REGION
 vpcId: $VPC_ID
