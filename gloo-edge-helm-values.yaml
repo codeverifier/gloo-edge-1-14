@@ -172,7 +172,7 @@ gloo:
  
   ## Discovery
   discovery:
-    enabled: true
+    enabled: false
     ## Whitelist mode for FDS polling
     fdsMode: WHITELIST
     ## Disabled due to performance issues
@@ -258,9 +258,9 @@ gloo:
                   %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION%
                   %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%"
                   "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%UPSTREAM_HOST%"
-            - grpcService:
-                logName: "monetization-log"
-                staticClusterName: "extauth"
+            #- grpcService:
+            #    logName: "monetization-log"
+            #    staticClusterName: "extauth"
   
         ## Custom http gateway
         # customHttpGateway:

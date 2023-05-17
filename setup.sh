@@ -84,7 +84,19 @@ get_current_context() {
 
 install_gloo_edge() {
     local context=$1
+    local custom_helm_file=$2
+
+    local helm_file=$DIR/gloo-edge-helm-values.yaml
+
     print_info "Installing Gloo Edge on cluster"
+
+    if [[ ! -z $custom_helm_file ]]; then
+        if [[ -f $custom_helm_file ]]; then
+            helm_file=$custom_helm_file
+        else
+            error_exit "Override file doesnt exist for installing Gloo Edge"
+        fi
+    fi
 
     helm repo add gloo-ee https://storage.googleapis.com/gloo-ee-helm
     helm repo update gloo-ee --fail-on-repo-update-fail
@@ -103,7 +115,7 @@ install_gloo_edge() {
         --create-namespace \
         --version=${GLOO_EDGE_HELM_VERSION} \
         --set-string license_key=${GLOO_EDGE_LICENSE_KEY} \
-        -f $DIR/gloo-edge-helm-values.yaml
+        -f $helm_file
     
     kubectl --context ${context} \
         -n gloo-system wait deploy/gloo --for condition=Available=True --timeout=90s
@@ -123,15 +135,20 @@ get_current_context
 cloud_specific_pre_req_checks $CLOUD_PROVIDER
 
 should_deploy_integrations=false
+custom_helm_file=""
 
-SHORT=i,h
-LONG=integrations,help
-OPTS=$(getopt -a -n "install.sh" --options $SHORT --longoptions $LONG -- "$@")
+SHORT=f:,i,h
+LONG=file,integrations,help
+OPTS=$(getopt -a -n "setup.sh" --options $SHORT --longoptions $LONG -- "$@")
 
 eval set -- "$OPTS"
 
 while :; do
     case "$1" in
+    -f | --file)
+        custom_helm_file="$2"
+        shift 2
+        ;;
     -i | --integrations)
         shift 1
         should_deploy_integrations=true
@@ -154,7 +171,7 @@ echo -n "Deploying Gloo Edge $GLOO_EDGE_VERSION"
 echo ""
 
 if [[ "$should_deploy_integrations" == true ]]; then
-    $DIR/integrations/provision-integrations.sh -n $PROJECT -r $CLUSTER_REGION -p $CLOUD_PROVIDER -c $CURRENT_CONTEXT -s "cert_manager, vault"
+    $DIR/integrations/provision-integrations.sh -n "${CLUSTER_OWNER}-${PROJECT}" -r $CLUSTER_REGION -p $CLOUD_PROVIDER -c $CURRENT_CONTEXT -s "cert_manager, vault, alb"
 fi
 
-install_gloo_edge $CURRENT_CONTEXT
+install_gloo_edge $CURRENT_CONTEXT $custom_helm_file

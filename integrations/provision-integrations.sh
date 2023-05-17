@@ -82,7 +82,7 @@ create_aws_identity_provider_and_service_account() {
 
     eksctl utils associate-iam-oidc-provider \
         --region $cluster_region \
-        --cluster ${CLUSTER_OWNER}-${cluster_name} \
+        --cluster ${cluster_name} \
         --approve
 
     aws iam create-policy \
@@ -93,7 +93,7 @@ create_aws_identity_provider_and_service_account() {
     eksctl create iamserviceaccount \
         --name=${sa_name} \
         --namespace=${sa_namespace} \
-        --cluster=${CLUSTER_OWNER}-${cluster_name} \
+        --cluster=${cluster_name} \
         --region=$cluster_region \
         --attach-policy-arn=$(aws iam list-policies --output json | jq --arg pn "${CLUSTER_OWNER}_${policy_name}" -r '.Policies[] | select(.PolicyName == $pn)'.Arn) \
         --override-existing-serviceaccounts \
@@ -121,7 +121,7 @@ install_alb_controller() {
 
         # Get the VPC ID
         export VPC_ID=$(aws ec2 describe-vpcs --region $cluster_region \
-            --filters Name=tag:Name,Values=eksctl-${CLUSTER_OWNER}-${cluster_name}-cluster/VPC | jq -r '.Vpcs[]|.VpcId')
+            --filters Name=tag:Name,Values=eksctl-${cluster_name}-cluster/VPC | jq -r '.Vpcs[]|.VpcId')
     elif [[ "$cluster_provider" == "eks-ipv6" ]]; then
         export ALB_ARN=$(aws iam get-role --role-name "$cluster_name-alb" --query 'Role.[Arn]' --output text)
         export VPC_ID=$(aws ec2 describe-vpcs --region $cluster_region \
